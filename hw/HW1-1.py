@@ -20,7 +20,7 @@ mid = p + (q-p)/2
 err = abs(f(mid))
 start = time.time()
 
-while err > 10**(-4):
+while err > 10**(-6):
     n = n + 1
     print(n, "번 반복 | x1 = ", p, ", x2 = ", q, " | f(x1) = ", f(p), ", f(x2) = ", f(q), " err : ", err)
 
