@@ -9,7 +9,7 @@ def ff(x) :
     return (4 * a * x**3) + (3 * b * x**2) + (2 * c * x) + d
 
 #초기값 설정
-s = 6
+s = 100
 
 start = time.time()
 n = 0

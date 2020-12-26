@@ -5,10 +5,13 @@ n = 0
 def f(x) :
     return (a * x**4) + (b * x**3) + (c * x**2) + (d * x) + e
 
+print(f(-1000))
+print(f(1000))
+
 while True:
     #근의 범위 지정
-    s1 = 5
-    s2 = 6
+    s1 = -1000
+    s2 = 1000
     if f(s1)*f(s2) < 0 :
         p = s1
         q = s2
@@ -19,6 +22,7 @@ mid = p + (q-p)/2
 
 err = abs(f(mid))
 start = time.time()
+
 
 while err > 10**(-6):
     n = n + 1
