@@ -19,8 +19,8 @@ def exfff(x, h) :
     return (f(x + h) - (2 * f(x)) + f(x - h))/(h**2)
 
 #초기값 설정
-s = 100
-h = 0.1
+s = 10000
+h = 100
 
 start = time.time()
 n = 0

@@ -16,7 +16,7 @@ def fff(x) :
     return (12 * a * x**2) + (6 * b * x) + 2 * c
 
 #초기값 설정
-s = -2
+s = 10000
 
 start = time.time()
 n = 0
