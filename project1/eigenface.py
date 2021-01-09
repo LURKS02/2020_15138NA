@@ -1,112 +1,143 @@
-from __future__ import print_function
+import matplotlib
 import numpy as np
-from scipy import io
-import warnings
-warnings.filterwarnings("ignore")
+import prettytable as pt
+import ipykernel
 import matplotlib.pyplot as plt
-import cv2
-from time import time
-import logging
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-from sklearn.decomposition import PCA
-from sklearn.svm import SVC
-from sklearn.datasets import fetch_lfw_people
 import operator
 
-mat_file = io.loadmat('C://Users/dihye/PycharmProjects/NA/project1/YaleB_32x32.mat')
-print(mat_file)
-people = fetch_lfw_people(min_faces_per_person=60,resize=0.3,color=False)
+from IPython.display import set_matplotlib_formats
+set_matplotlib_formats('pdf', 'png')
+plt.rcParams['savefig.dpi'] = 75
 
-images = people.images
-print(images.shape)
-images_vec = images.reshape(images.shape[0], images.shape[1]*images.shape[2])
-print(images_vec.shape)
+plt.rcParams['figure.autolayout'] = False
+plt.rcParams['figure.figsize'] = 10, 6
+plt.rcParams['axes.labelsize'] = 18
+plt.rcParams['axes.titlesize'] = 20
+plt.rcParams['font.size'] = 16
+plt.rcParams['lines.linewidth'] = 2.0
+plt.rcParams['lines.markersize'] = 8
+plt.rcParams['legend.fontsize'] = 14
 
-mean = np.zeros((1, images.shape[1]*images.shape[2]))
-for i in images_vec:
+plt.rcParams['text.usetex'] = True
+plt.rcParams['font.family'] = "serif"
+plt.rcParams['font.serif'] = "cm"
+plt.rcParams['text.latex.preamble'] = "\\usepackage{subdepth}, \\usepackage{type1cm}"
+
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+from time import time
+from sklearn.datasets import fetch_lfw_people
+
+
+dataset = fetch_lfw_people(min_faces_per_person=10, resize=0.3)
+
+n_images = dataset.images.shape[0]
+height = dataset.images.shape[1]
+width = dataset.images.shape[2]
+j = 0
+list = []
+for i in (dataset.target):
+    if (i == 22):
+        list.append(j)
+    j = j + 1
+
+X = dataset.data
+print(X.shape)
+
+dimension = X.shape[1]
+
+def plot_faces(images, n_row=2, n_col=5):
+    plt.figure(figsize=(1.5 * n_col, 2.2 * n_row))
+    plt.subplots_adjust(0.6, 0.5, 1.5, 1.5)
+    for i in range(n_row * n_col):
+        plt.subplot(n_row, n_col, i + 1)
+        plt.imshow(images[i].reshape((height, width)), cmap=plt.cm.gray)
+        plt.xticks(())
+        plt.yticks(())
+    plt.tight_layout()
+    plt.show()
+
+def plot_face(image, n_row=1, n_col=1):
+    plt.figure(figsize=(1.5*n_col, 2.2*n_row))
+    plt.subplots_adjust(0.6,0.5,1.5,1.5)
+    plt.subplot(n_row,n_col,1)
+    plt.imshow(image.reshape((height,width)), cmap=plt.cm.gray)
+    plt.xticks(())
+    plt.yticks(())
+    plt.tight_layout()
+    plt.show()
+
+mean = np.zeros((1, dimension))
+for i in X:
     mean = np.add(mean, i)
-mean = np.divide(mean, float(images.shape[0])).flatten()
-print(mean.shape)
-
-normalised_faces = np.ndarray(shape=(images_vec.shape[0], images_vec.shape[1]))
-for i in range(images_vec.shape[0]):
-    normalised_faces[i] = np.subtract(images_vec[i], mean)
-normalised_faces = normalised_faces.T
-
-covariance = np.cov(normalised_faces)
-covariance = np.divide(covariance, normalised_faces.shape[0])
-
-pca = PCA(n_components=normalised_faces.shape[0])
-pca.fit(covariance)
-
-eig_vals = pca.explained_variance_
-eig_vecs = pca.components_
+mean = np.divide(mean, float(n_images)).flatten()
+mean = mean.reshape(1,dimension)
 
 
-eig_pairs = [(eig_vals[index], eig_vecs[:,index]) for index in range(len(eig_vals))]
-sorted(eig_pairs, key=operator.itemgetter(0), reverse=True)
+X1 = [2225, 227, 1343, 803, 2400]
+X2 = [4110, 1636, 216, 116, 121]
+X3 = [315, 560, 836, 1035, 1172]
+X4 = [136, 293, 322, 390, 434]
+X5 = [20, 172, 473, 742, 898]
+X6 = [335, 466, 563, 833, 908]
+X7 = [9, 73, 692, 703, 967]
+X8 = [472, 493, 497, 614, 854]
+X9 = [16, 304, 359, 620, 886]
+X10 = [1715, 1716, 1892, 2403, 2502]
 
-sort_eigvals = [eig_pairs[index][0] for index in range(len(eig_vals))]
-sort_eigvecs = [eig_pairs[index][1] for index in range(len(eig_vals))]
+X = np.subtract(X, mean)
 
-#상위 30개의 eigenfaces
-reduced_vec = np.array(sort_eigvecs[:30])
-print(reduced_vec.shape)
+# 평균 + 일반 사진 보여주기
+
+
+X_train, X_test = train_test_split(X, test_size=0.25, random_state=42)
+
+n_components = 10
+
+t0 = time()
+
+pca = PCA(n_components=n_components, svd_solver='randomized')
+pca.fit(X)
+
+eigenfaces = pca.components_
+
+#plot_faces(eigenfaces[:10])
+
+'''
+minus = X[:10]
+minus = minus - mean
+plot_faces(minus)
+
+c= X[0]-mean
+c= np.dot(c, eigenfaces[0])
+c = c * eigenfaces[0]
+c = 0.1 * eigenfaces[0] + 1* eigenfaces[4] - mean
+'''
 
 def getCoefficients (image, mean, vectors):
     coeff = []
-    normalised_vec = image - mean
-    for i in range(30):
+    normalised_vec = image
+    for i in range(n_components):
         coeffval = np.dot(normalised_vec, vectors[i])
         coeff.append(coeffval)
     return coeff
 
-coeffs = getCoefficients(images_vec[80], mean, reduced_vec)
-print(coeffs)
-
-generate_face = np.zeros((1, images_vec.shape[1]))
-for i in range (30):
-    generate_face = generate_face + coeffs[i] * reduced_vec[i]
-generate_face = generate_face + mean
-
-test_image_show = generate_face.reshape(images.shape[1], images.shape[2])
-plt.imshow(test_image_show, cmap='gray')
-plt.show()
+coarr = []
+for i in range(X.shape[0]):
+    coeffs = getCoefficients(X[i], mean, eigenfaces)
+    coarr.append(coeffs)
 
 
-'''
-test_image = images_vec[0]
-test_image = normalised_faces[0]
-test_image_show = test_image.reshape(images.shape[1], images.shape[2])
-plt.imshow(test_image_show, cmap='gray')
-plt.show()
-'''
+for i in (X5):
+    print(np.round(coarr[i],2))
 
 
 
+arr = []
+for i in range(290,300):
+    generate_face = np.zeros((1, X.shape[1]))
+    for j in range (n_components):
+        generate_face = generate_face + np.dot(coarr[i][j], eigenfaces[j])
+    arr.append(generate_face)
 
-#mat_image = mat_vector.reshape(mat_vector.shape[0], 32, 32).astype(np.uint8)
-
-
-#showImage = mean.reshape(images.shape[1], images.shape[2]).astype(np.uint8)
-#showImage = normalised_faces[600].reshape(images.shape[1], images.shape[2])
-#showImage = images[600]
-#showImage = mean.reshape(images.shape[1], images.shape[2])
-#plt.imshow(showImage, cmap='gray')
-#plt.show()
-
-
-#resizeImage = cv2.resize(showImage, None, None, 10, 10, cv2.INTER_CUBIC)
-#cv2.imshow('image', resizeImage)
-#cv2.waitKey(0)
-
-'''
-cv2.imshow('image',loadImage)
-cv2.waitKey(0)'''
-
-
-
+plot_faces(arr + mean)
